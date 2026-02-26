@@ -61,14 +61,14 @@ public class SqlInjectionChallenge extends AssignmentEndpoint {
     AttackResult attackResult = checkArguments(username_reg, email_reg, password_reg);
 
     if (attackResult == null) {
-
-      try (Connection connection = dataSource.getConnection()) {
         // Cambiamos la user query, eliminando la concatenacion y usando la interrogación. 
         String checkUserQuery = "select userid from sql_challenge_users where userid = ?";
-        //Sustituimos el statement por un prepared statement, y seteamos el valor del username_reg en la interrogación.
-        PreparedStatement statement = connection.prepareStatement(checkUserQuery);
+
+      try (Connection connection = dataSource.getConnection();
+       PreparedStatement statement = connection.prepareStatement(checkUserQuery)) { //Usamos un prepared statement en un try with resources para asegurar el cierre del statement y la conexión.
+        // En lugar de concatenar el username_reg directamente en la query, lo pasamos como parámetro al prepared statement.
         statement.setString(1, username_reg);
-        
+
         ResultSet resultSet = statement.executeQuery();
 
         if (resultSet.next()) {
