@@ -132,6 +132,22 @@ public class JWTRefreshEndpoint extends AssignmentEndpoint {
 
     String user;
     String refreshToken;
+    // Cambia la clase de Jwt a Jws y el método de parse a parseClaimsJws
+    try {
+        Jws<Claims> jws = Jwts.parser()
+                .setSigningKey(JWT_PASSWORD)
+                .parseClaimsJws(token.replace("Bearer ", ""));
+                
+        // Ahora obtenemos los datos del cuerpo (body) del JWS verificado
+        user = (String) jws.getBody().get("user");
+        refreshToken = (String) json.get("refresh_token");
+        
+    } catch (ExpiredJwtException e) {
+        // Tu lógica actual para tokens expirados
+        user = (String) e.getClaims().get("user");
+        refreshToken = (String) json.get("refresh_token");
+    }
+
     try {
       Jwt<Header, Claims> jwt =
           Jwts.parser().setSigningKey(JWT_PASSWORD).parse(token.replace("Bearer ", ""));
